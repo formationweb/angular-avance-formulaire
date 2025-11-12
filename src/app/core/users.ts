@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface User {
   id: number
@@ -15,8 +15,17 @@ export interface User {
 export class Users {
   private http = inject(HttpClient)
   readonly url = 'https://jsonplaceholder.typicode.com/users'
+  user$ = new BehaviorSubject<User>({} as User)
 
   getUser(id: number): Observable<User> {
-    return this.http.get<User>(this.url + '/' + id)
+    return this.http.get<User>(this.url + '/' + id).pipe(
+      tap((user) => {
+        this.updateObjectUser(user)
+      })
+    )
+  }
+
+  updateObjectUser(userObject: User) {
+    this.user$.next(userObject)
   }
 }

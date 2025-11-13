@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormArray, FormBuilder } from '@angular/forms';
 import { User, Users } from '../users';
 import { startWith, tap } from 'rxjs';
 
@@ -26,6 +26,7 @@ export class UserFormBuilder {
           lng: '',
         }),
       }),
+      tags: this.formBuilder.array([])
     });
 
     const user$ = this.usersService.user$.pipe(

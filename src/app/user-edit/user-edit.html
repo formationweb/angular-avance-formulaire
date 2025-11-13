@@ -29,6 +29,25 @@
     </div>
 
     <button>Modifier</button>
+
+    <div>
+        <h1>Tags</h1>
+        <div formArrayName="tags">
+            @for (tag of tags.controls ; track tag) {
+                <div [formGroupName]="$index">
+                    <label>Name</label>
+                    <input type="text" formControlName="name">
+
+                    <label>Color</label>
+                    <input type="color" formControlName="color">
+                </div>
+                <button (click)="removeTag($index)">Supprimer un tag</button>
+            }
+        </div>
+        <button (click)="addTag()">Ajouter un tag</button>
+    </div>
+
+    
 </form>
 
 <!-- <ng-container *ngIf="vm$ | async as vm">

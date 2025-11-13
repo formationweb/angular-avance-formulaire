@@ -1,0 +1,7 @@
+<form [formGroup]="formGroup" (ngSubmit)="submit()">
+    @for (field of formGroup.controls | keyvalue; track field) {
+        <label>{{ field.key }}</label>
+        <input [formControlName]="field.key">
+    }
+    <ng-content />
+</form>

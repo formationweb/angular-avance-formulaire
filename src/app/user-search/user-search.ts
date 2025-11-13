@@ -43,10 +43,7 @@ export class UserSearch {
   )
 
   readonly filters$ = this.form.get('filters')!.valueChanges.pipe(
-    startWith({
-      company: '',
-      city: ''
-    })
+    startWith( this.form.get('filters')!.value)
   )
 
   readonly result$ = combineLatest([ this.query$, this.filters$]).pipe(

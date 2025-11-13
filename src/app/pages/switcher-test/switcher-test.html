@@ -1,3 +1,7 @@
 <app-switcher [(ngModel)]="active" [disabled]="true" />
 
 <p>Est activé: {{ active }}</p>
+
+<app-rating-stars [max]="10" [(ngModel)]="nbStars" />
+
+<p>La note: {{ nbStars }}</p>

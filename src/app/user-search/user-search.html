@@ -1,6 +1,15 @@
 @let users = (vm$ | async)?.results;
 
-<input type="text" [formControl]="searchControl">
+<form [formGroup]="form">
+    <input type="text" formControlName="query">
+    <div formGroupName="filters">
+        <label>Filtrer city</label>
+        <input type="text" formControlName="city">
+
+        <label>Filtrer company</label>
+        <input type="text" formControlName="company">
+    </div>
+</form>
 
 @if (searchControl.hasError('required')) {
     <p>Champ est requis</p>
@@ -8,6 +17,6 @@
 
 <ul>
     @for (user of users ; track user.id) {
-        <li>{{ user.name }}</li>
+        <li>{{ user.name }} - {{ user.company.name }} - {{ user.address.city }}</li>
     }
 </ul>

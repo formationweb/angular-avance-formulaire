@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { combineLatest, debounceTime, distinctUntilChanged, filter, map, of, startWith, switchMap, tap } from 'rxjs';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { combineLatest, debounceTime, distinctUntilChanged, filter, map, mergeMap, of, startWith, switchMap, tap } from 'rxjs';
 import { Users } from '../core/users';
 import { AsyncPipe } from '@angular/common';
 
@@ -12,15 +12,27 @@ import { AsyncPipe } from '@angular/common';
 })
 export class UserSearch {
   private usersService = inject(Users)
-  searchControl = new FormControl('', {
-    validators: [
-      Validators.required,
-      Validators.minLength(3)
-    ],
-    nonNullable: true
-  })
+  private formBuilder = inject(FormBuilder)
 
-  readonly result$ = this.searchControl.valueChanges.pipe(
+  form = this.formBuilder.group({
+    query: ['', {
+      validators: [
+        Validators.required,
+        Validators.minLength(3)
+      ],
+      nonNullable: true
+    }],
+    filters: this.formBuilder.group({
+      city: '',
+      company: ''
+    })
+  })
+  
+  get searchControl() {
+    return this.form.get('query') as FormControl<string>
+  }
+
+  readonly query$ = this.searchControl.valueChanges.pipe(
     switchMap((str) => {
       return this.usersService.usersList$.pipe(
         map((usersList) => {
@@ -30,10 +42,27 @@ export class UserSearch {
     })
   )
 
+  readonly filters$ = this.form.get('filters')!.valueChanges.pipe(
+    startWith({
+      company: '',
+      city: ''
+    })
+  )
+
+  readonly result$ = combineLatest([ this.query$, this.filters$]).pipe(
+      map(([ usersList, filters ]) => {
+         return usersList.filter(user => {
+            const matchCity = filters.city ? user.address.city.includes(filters.city) : true
+            const matchCompany = filters.company ? user.company.name.includes(filters.company) : true
+            return matchCity && matchCompany
+         })
+      })
+  )
+
   readonly valid$ = this.searchControl.statusChanges
 
   readonly resultValid$ = this.valid$.pipe(
-    switchMap((valid) => valid == 'VALID' ? this.result$ : of([]))
+    mergeMap((valid) => valid == 'VALID' ? this.result$ : of([]))
   )
 
   readonly vm$ = combineLatest([

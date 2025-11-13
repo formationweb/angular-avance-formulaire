@@ -17,6 +17,11 @@ export interface User {
       lng: string;
     };
   };
+  company: {
+    name: string;
+    catchPhrase: string;
+    bs: string;
+  };
 }
 
 @Injectable({

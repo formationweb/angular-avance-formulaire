@@ -8,7 +8,7 @@ type OnTouched = () => void
   selector: 'app-switcher',
   imports: [],
   template: `
-    <div class="switch" [class.on]="value" (click)="toggle()">{{ value ? 'ON' : 'OFF' }}</div>
+    <div class="switch" [class.on]="value" [class.disabled]="disabled" (click)="toggle()">{{ value ? 'ON' : 'OFF' }}</div>
   `,
   providers: [
     {
@@ -30,10 +30,14 @@ type OnTouched = () => void
       background: #4caf50;
       color: white;
     }
+    .switch.disabled {
+      opacity: 0.5;
+    }
   `
 })
 export class Switcher implements ControlValueAccessor {
   value = false
+  disabled = false
   onChange: OnChange = () => {}
   onTouched: OnTouched = () => {}
   
@@ -49,7 +53,14 @@ export class Switcher implements ControlValueAccessor {
     this.onTouched = fn
   }
 
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled
+  }
+
   toggle() {
+    if (this.disabled) {
+      return
+    }
     this.value = !this.value
     this.onChange(this.value)
     this.onTouched()

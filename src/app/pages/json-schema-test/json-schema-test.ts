@@ -20,13 +20,27 @@ export class JsonSchemaTest {
   private jsonSchemaFactory = inject(JsonSchemaFormFactory)
 
   userSchema: JsonSchema = {
-    type: 'object',
+    type: "object",
     properties: {
-      name:      { type: 'string', minLength: 2 },
-      email:     { type: 'string', format: 'email' },
-      age:       { type: 'number', minimum: 18 }
+      name: { type: "string", minLength: 2 },
+      email: { type: "string", format: "email" },
+      age: { type: "number", minimum: 18 },
+      address: {
+        type: "object",
+        properties: {
+          city: { type: "string" },
+          zipcode: { type: "string", minLength: 5 },
+        },
+        required: ["city"],
+      },
+      hobbies: { type: "array", items: { 
+        type: "object",
+        properties: {
+          name: { type: "string" }
+        },
+      } },
     },
-    required: ['name', 'email']
+    required: ["name", "email"],
   };
 
   form = this.jsonSchemaFactory.create(this.userSchema)

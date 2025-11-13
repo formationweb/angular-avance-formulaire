@@ -2,10 +2,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { JsonSchema } from '../factory';
 import { KeyValuePipe } from '@angular/common';
+import { JsonField } from '../json-field/json-field';
 
 @Component({
   selector: 'app-json-form',
-  imports: [ReactiveFormsModule, KeyValuePipe],
+  imports: [ReactiveFormsModule, KeyValuePipe, JsonField],
   templateUrl: './json-form.html',
   styleUrl: './json-form.css',
 })

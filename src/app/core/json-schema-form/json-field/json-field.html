@@ -1,0 +1,21 @@
+@if (isFormControl()) {
+    <input [formControl]="formControl" />
+}
+
+@if (isFormGroup()) {
+    <div class="form-group">
+        @for (field of formGroup.controls | keyvalue; track field) {
+            <label>{{ field.key }}</label>
+            <app-json-field [schema]="$any(schema.properties[field.key])" [control]="field.value" />
+        }
+    </div>
+}
+
+@if (isFormArray()) {
+    <div class="form-array">
+        @for (entry of formArray.controls ; track entry) {
+            <app-json-field [schema]="$any(schema).items" [control]="entry" />
+        }
+        <button type="button" (click)="addEntry()">Ajouter</button>
+    </div>
+}

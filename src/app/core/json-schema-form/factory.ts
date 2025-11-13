@@ -1,18 +1,28 @@
 import { inject, Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 
-type JsonSchemaType = 'object' | 'number' | 'string'
+type JsonSchemaType = 'number' | 'string' | 'boolean'
+
+
+export type JsonPropertyArray = {
+  type: 'array',
+  items: JsonProperty
+}
+
+type JsonProperty = {
+  type: JsonSchemaType
+  minLength?: number
+  format?: string
+  minimum?: number,
+} | JsonSchema |JsonPropertyArray 
+
+type JsonProperties =  {
+  [key: string]: JsonProperty
+}
 
 export type JsonSchema = {
   type: 'object',
-  properties: {
-    [key: string]: {
-      type: JsonSchemaType
-      minLength?: number
-      format?: string
-      minimum?: number
-    }
-  },
+  properties: JsonProperties,
   required?: string[]
 }
 
@@ -41,7 +51,15 @@ export class JsonSchemaFormFactory {
         if (val.minimum) validators.push(Validators.min(val.minimum))
       }
 
-      group[key] = ['', validators]
+      if (val.type == 'array') {
+        group[key] = this.formBuilder.array([])
+      }
+      else if (val.type == 'object') {
+        group[key] = this.create(val)
+      }
+      else {
+        group[key] = ['', validators]
+      }
     }
 
     return this.formBuilder.group(group)

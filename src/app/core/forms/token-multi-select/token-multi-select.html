@@ -1,8 +1,8 @@
-<input type="text" placeholder="Filtrer..." (input)="filterOptions($event)">
+<input type="text" placeholder="Filtrer..." [(ngModel)]="searchOption">
 
 <ul>
-    @for (option of optionsFiltered ; track option.id) {
-        <li [aria-selected]="highlightedIndex == $index" (click)="toggleOption(option)" [class.hightlight]="highlightedIndex == $index">{{ option.label }}</li>
+    @for (option of optionsFiltered() ; track option.id) {
+        <li [aria-selected]="highlightedIndex() == $index" (click)="toggleOption(option)" [class.hightlight]="highlightedIndex() == $index">{{ option.label }}</li>
     }
 </ul>
 

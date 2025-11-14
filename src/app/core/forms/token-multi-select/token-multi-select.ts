@@ -1,5 +1,5 @@
-import { Component, forwardRef, input, Input, OnInit } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, computed, forwardRef, input, Input, OnInit, signal } from '@angular/core';
+import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 type OnChange = (value: number[]) => void
 type OnTouched = () => void
@@ -11,7 +11,7 @@ interface TokenOption {
 
 @Component({
   selector: 'app-token-multi-select',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './token-multi-select.html',
   styleUrl: './token-multi-select.css',
   host: {
@@ -34,22 +34,23 @@ interface TokenOption {
     }
   `
 })
-export class TokenMultiSelect implements ControlValueAccessor, OnInit {
+export class TokenMultiSelect implements ControlValueAccessor {
   //@Input() options: TokenOption[] = []
   options = input<TokenOption[]>([])
-  selectedIds = new Set<number>()
+  selectedIds = signal(new Set<number>())
+
+  highlightedIndex = signal(0)
+  searchOption = signal('')
+
+  optionsFiltered = computed(() => {
+    return this.options().filter(option => option.label.includes(this.searchOption()))
+  })
+
   onChange: OnChange = () => {}
   onTouched: OnTouched = () => {}
 
-  optionsFiltered: TokenOption[] = []
-  highlightedIndex = 0
-
-  ngOnInit(): void {
-     this.optionsFiltered = this.options()
-  }
-
   writeValue(array: number[]): void {
-    this.selectedIds = new Set(array)
+    this.selectedIds.set(new Set(array))
   }
 
   registerOnChange(fn: OnChange): void {
@@ -61,44 +62,43 @@ export class TokenMultiSelect implements ControlValueAccessor, OnInit {
   }
 
   toggleOption(option: TokenOption) {
-    if (this.selectedIds.has(option.id)) {
-      this.selectedIds.delete(option.id)
+    if (this.selectedIds().has(option.id)) {
+      this.selectedIds().delete(option.id)
     }
     else {
-      this.selectedIds.add(option.id)
+      this.selectedIds().add(option.id)
     }
     this.onTouched()
-    this.onChange([...this.selectedIds])
-  }
-
-  filterOptions(event: any) {
-    const value = event?.target?.value
-    this.optionsFiltered = this.options().filter(option => option.label.includes(value))
+    this.onChange([...this.selectedIds()])
   }
 
   get selectedOptions() {
-    return this.options().filter(option => this.selectedIds.has(option.id))
+    return this.options().filter(option => this.selectedIds().has(option.id))
   }
 
+  // selectedOptions = computed(() => {
+  //   return this.options().filter(option => this.selectedIds().has(option.id))
+  // })
+
   highlightNext() {
-    const length = this.optionsFiltered.length
+    const length = this.optionsFiltered().length
     if (!length) {
       return
     }
-    const next = (this.highlightedIndex + 1) % length
-    this.highlightedIndex = next
+    const next = (this.highlightedIndex() + 1) % length
+    this.highlightedIndex.set(next)
   }
 
   highlightPrevious() {
-    const length = this.optionsFiltered.length
+    const length = this.optionsFiltered().length
     if (!length) {
       return
     }
-    const next = (this.highlightedIndex - 1 + length) % length
-    this.highlightedIndex = next
+    const next = (this.highlightedIndex() - 1 + length) % length
+    this.highlightedIndex.set(next)
   }
 
   highlightSelected() {
-    this.toggleOption(this.optionsFiltered[this.highlightedIndex])
+    this.toggleOption(this.optionsFiltered()[this.highlightedIndex()])
   }
 }

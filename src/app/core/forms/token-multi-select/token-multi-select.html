@@ -2,7 +2,7 @@
 
 <ul>
     @for (option of optionsFiltered ; track option.id) {
-        <li (click)="toggleOption(option)">{{ option.label }}</li>
+        <li [aria-selected]="highlightedIndex == $index" (click)="toggleOption(option)" [class.hightlight]="highlightedIndex == $index">{{ option.label }}</li>
     }
 </ul>
 

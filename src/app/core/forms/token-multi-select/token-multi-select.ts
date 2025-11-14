@@ -14,6 +14,13 @@ interface TokenOption {
   imports: [],
   templateUrl: './token-multi-select.html',
   styleUrl: './token-multi-select.css',
+  host: {
+    role: 'listbox',
+    tabindex: '0',
+    '(keydown.arrowdown)': 'highlightNext()',
+    '(keydown.arrowup)': 'highlightPrevious()',
+    '(keydown.enter)': 'highlightSelected()'
+  },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -21,6 +28,11 @@ interface TokenOption {
       multi: true
     },
   ],
+  styles: `
+    .hightlight {
+      background-color: blue;
+    }
+  `
 })
 export class TokenMultiSelect implements ControlValueAccessor, OnInit {
   @Input() options: TokenOption[] = []
@@ -29,6 +41,7 @@ export class TokenMultiSelect implements ControlValueAccessor, OnInit {
   onTouched: OnTouched = () => {}
 
   optionsFiltered: TokenOption[] = []
+  highlightedIndex = 0
 
   ngOnInit(): void {
      this.optionsFiltered = this.options
@@ -64,5 +77,27 @@ export class TokenMultiSelect implements ControlValueAccessor, OnInit {
 
   get selectedOptions() {
     return this.options.filter(option => this.selectedIds.has(option.id))
+  }
+
+  highlightNext() {
+    const length = this.optionsFiltered.length
+    if (!length) {
+      return
+    }
+    const next = (this.highlightedIndex + 1) % length
+    this.highlightedIndex = next
+  }
+
+  highlightPrevious() {
+    const length = this.optionsFiltered.length
+    if (!length) {
+      return
+    }
+    const next = (this.highlightedIndex - 1 + length) % length
+    this.highlightedIndex = next
+  }
+
+  highlightSelected() {
+    this.toggleOption(this.optionsFiltered[this.highlightedIndex])
   }
 }

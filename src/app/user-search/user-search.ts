@@ -1,18 +1,21 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { combineLatest, debounceTime, distinctUntilChanged, filter, map, mergeMap, of, startWith, switchMap, tap } from 'rxjs';
 import { Users } from '../core/users';
 import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-user-search',
   imports: [ReactiveFormsModule, AsyncPipe],
   templateUrl: './user-search.html',
   styleUrl: './user-search.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserSearch {
   private usersService = inject(Users)
   private formBuilder = inject(FormBuilder)
+  count = 0
 
   form = this.formBuilder.group({
     query: ['', {
@@ -32,7 +35,9 @@ export class UserSearch {
     return this.form.get('query') as FormControl<string>
   }
 
-  readonly query$ = this.searchControl.valueChanges.pipe(
+  readonly loadUsers = toSignal(this.usersService.loadUsers())
+
+  readonly usersList = toSignal(this.searchControl.valueChanges.pipe(
     switchMap((str) => {
       return this.usersService.usersList$.pipe(
         map((usersList) => {
@@ -40,42 +45,29 @@ export class UserSearch {
         })
       )
     })
-  )
+  ), {
+    initialValue: []
+  })
 
-  readonly filters$ = this.form.get('filters')!.valueChanges.pipe(
-    startWith( this.form.get('filters')!.value)
-  )
+  readonly filters = toSignal(this.form.get('filters')!.valueChanges, {
+    initialValue: {
+      city: '',
+      company: ''
+    }
+  })
 
-  readonly result$ = combineLatest([ this.query$, this.filters$]).pipe(
-      map(([ usersList, filters ]) => {
-         return usersList.filter(user => {
-            const matchCity = filters.city ? user.address.city.includes(filters.city) : true
-            const matchCompany = filters.company ? user.company.name.includes(filters.company) : true
-            return matchCity && matchCompany
-         })
-      })
-  )
+  readonly users = computed(() => {
+    if (!this.valid()) {
+      return []
+    }
+    return this.usersList().filter(user => {
+      const matchCity = this.filters().city ? user.address.city.includes(this.filters().city ?? '') : true
+      const matchCompany = this.filters().company ? user.company.name.includes(this.filters().company ?? '') : true
+      return matchCity && matchCompany
+   })
+  })
 
-  readonly valid$ = this.searchControl.statusChanges.pipe(
-    startWith(this.searchControl.status),
+  readonly valid = toSignal(this.searchControl.statusChanges.pipe(
     map(status => status == 'VALID')
-  )
-
-  readonly resultValid$ = combineLatest([
-    this.result$,
-    this.valid$
-  ]).pipe(
-    map(([ results, isValid ]) => isValid ? results : [])
-  )
-
-  readonly vm$ = combineLatest([
-    this.resultValid$,
-    this.usersService.loadUsers()
-  ]).pipe(
-    map(([results]) => {
-      return {
-        results
-      }
-    })
-  )
+  ))
 }

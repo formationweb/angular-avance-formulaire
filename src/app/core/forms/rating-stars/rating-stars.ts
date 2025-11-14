@@ -7,12 +7,18 @@ type OnTouched = () => void
 @Component({
   selector: 'app-rating-stars',
   imports: [],
+  host: {
+    role: 'radiogroup',
+    tabindex: '0',
+    '[aria-disabled]': 'disabled ? "true" : null',
+    '(keydown.arrowright)': 'selectNext()'
+  },
   template: `
-    <div>
+    <ul [class.disabled]="disabled">
       @for (star of stars ; track $index) {
-          <span (click)="select($index)">⭐</span>
+          <li (click)="select($index)" role="radio" [aria-checked]="value == $index+1">⭐</li>
       }
-    </div>
+    </ul>
   `,
    providers: [
     {
@@ -21,6 +27,13 @@ type OnTouched = () => void
       multi: true
     },
   ],
+  styles: 
+    `
+      .disabled {
+        opacity: 0.5;
+      }
+    `
+  
 })
 export class RatingStars implements ControlValueAccessor {
   //@Input() max = 5
@@ -62,5 +75,9 @@ export class RatingStars implements ControlValueAccessor {
     this.value = index + 1
     this.onChange(this.value)
     this.onTouched()
+  }
+
+  selectNext() {
+     this.select(this.value)
   }
 }

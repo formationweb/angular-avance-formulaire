@@ -2,6 +2,13 @@
 
 <p>Est activé: {{ active }}</p>
 
-<app-rating-stars [max]="10" [(ngModel)]="nbStars" />
+<app-rating-stars [max]="10" [(ngModel)]="nbStars" [disabled]="false"  />
 
 <p>La note: {{ nbStars }}</p>
+
+<app-token-multi-select
+  [options]="members"
+  [(ngModel)]="membersSelected">
+</app-token-multi-select>
+
+<p>NgModel = {{ membersSelected }}</p>

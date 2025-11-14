@@ -4,6 +4,7 @@ import { UserSearch } from './user-search/user-search';
 import { JsonSchemaTest } from './pages/json-schema-test/json-schema-test';
 import { Switcher } from './core/forms/switcher/switcher';
 import { SwitcherTest } from './pages/switcher-test/switcher-test';
+import { pendingChangesGuard } from './guards/pending-changes';
 
 export const routes: Routes = [
   {
@@ -13,6 +14,7 @@ export const routes: Routes = [
   {
     path: 'user/:id',
     component: UserEdit,
+    canDeactivate: [pendingChangesGuard]
   },
   {
     path: 'json-schema',

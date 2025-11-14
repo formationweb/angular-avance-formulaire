@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, OnInit } from '@angular/core';
+import { Component, forwardRef, input, Input, OnInit } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 type OnChange = (value: number[]) => void
@@ -35,7 +35,8 @@ interface TokenOption {
   `
 })
 export class TokenMultiSelect implements ControlValueAccessor, OnInit {
-  @Input() options: TokenOption[] = []
+  //@Input() options: TokenOption[] = []
+  options = input<TokenOption[]>([])
   selectedIds = new Set<number>()
   onChange: OnChange = () => {}
   onTouched: OnTouched = () => {}
@@ -44,7 +45,7 @@ export class TokenMultiSelect implements ControlValueAccessor, OnInit {
   highlightedIndex = 0
 
   ngOnInit(): void {
-     this.optionsFiltered = this.options
+     this.optionsFiltered = this.options()
   }
 
   writeValue(array: number[]): void {
@@ -72,11 +73,11 @@ export class TokenMultiSelect implements ControlValueAccessor, OnInit {
 
   filterOptions(event: any) {
     const value = event?.target?.value
-    this.optionsFiltered = this.options.filter(option => option.label.includes(value))
+    this.optionsFiltered = this.options().filter(option => option.label.includes(value))
   }
 
   get selectedOptions() {
-    return this.options.filter(option => this.selectedIds.has(option.id))
+    return this.options().filter(option => this.selectedIds.has(option.id))
   }
 
   highlightNext() {

@@ -56,10 +56,16 @@ export class UserSearch {
       })
   )
 
-  readonly valid$ = this.searchControl.statusChanges
+  readonly valid$ = this.searchControl.statusChanges.pipe(
+    startWith(this.searchControl.status),
+    map(status => status == 'VALID')
+  )
 
-  readonly resultValid$ = this.valid$.pipe(
-    mergeMap((valid) => valid == 'VALID' ? this.result$ : of([]))
+  readonly resultValid$ = combineLatest([
+    this.result$,
+    this.valid$
+  ]).pipe(
+    map(([ results, isValid ]) => isValid ? results : [])
   )
 
   readonly vm$ = combineLatest([
